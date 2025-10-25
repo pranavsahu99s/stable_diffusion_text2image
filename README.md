@@ -2,7 +2,16 @@
 
 A sleek, self-contained web interface for experimenting with the Stability AI SD3.5-Flash model. This app provides a user-friendly UI to control key generation parameters and includes features like style presets, dark/light mode, and a random prompt generator.
 
-![Project Screenshot](static/asset/screenshot.png)
+<p align="center">
+  <img src="static/asset/1.png" width="400"/>
+</p>
+<p align="center">
+  <img src="static/asset/2.png" width="600"/>
+</p>
+<p align="center">
+  <img src="static/asset/3.png" width="400"/>
+</p>
+
 
 ---
 
@@ -38,9 +47,9 @@ stable_diffusion_text2image/
 ├── README.md  
 ├── static/  
 │     └── style.css  
-└── templates/  
-      └── index.html  
-
+└── templates/   
+        └── index.html   
+  
 ---
 
 ## 🚀 Getting Started
@@ -106,3 +115,4 @@ Follow these instructions to get the project running on your local machine.
 * **Environment:** **`uv`** for high-speed package management and dependency locking.
 
 ---
+
