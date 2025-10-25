@@ -1,0 +1,353 @@
+/* --- 1. Root & Color Variables --- */
+:root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Light Theme Colors */
+    --bg-color: #f4f7f6;
+    --card-color: #ffffff;
+    --text-color: #111827;
+    --text-color-light: #6b7280;
+    --border-color: #e5e7eb;
+    --input-bg-color: #f9fafb;
+    --input-bg-focus: #ffffff;
+    --primary-color: #007aff;
+    --primary-color-hover: #005ec4;
+    --primary-color-faded: #e0f2fe; /* Added for prompt flash */
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --tooltip-bg: #333;
+    --tooltip-text: #fff;
+    --slider-bg: #ddd;
+    --slider-thumb: var(--primary-color);
+}
+
+/* --- 2. Dark Theme Variables --- */
+body.dark-theme {
+    --bg-color: #111827;
+    --card-color: #1f2937;
+    --text-color: #f9fafb;
+    --text-color-light: #9ca3af;
+    --border-color: #374151;
+    --input-bg-color: #374151;
+    --input-bg-focus: #4b5563;
+    --primary-color: #3b82f6;
+    --primary-color-hover: #2563eb;
+    --primary-color-faded: #374151; /* Added for prompt flash */
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --tooltip-bg: #f9fafb;
+    --tooltip-text: #111827;
+    --slider-bg: #4b5563;
+    --slider-thumb: var(--primary-color);
+}
+
+/* --- 3. Basic Setup --- */
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 40px 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--card-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    overflow: hidden;
+    transition: background-color 0.3s;
+}
+
+header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+header p {
+    margin: 4px 0 0;
+    font-size: 1rem;
+    color: var(--text-color-light);
+}
+
+main {
+    padding: 32px;
+}
+
+/* --- 4. Form Elements --- */
+#generation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+textarea, input[type="number"], select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border-radius: 8px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+textarea {
+    resize: vertical;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus, input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--input-bg-focus);
+    box-shadow: 0 0 0 2px var(--primary-color-hover);
+}
+
+/* --- 4.5. Form Addons (Icon Button) --- */
+.label-wrapper {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 6px; 
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem; 
+    cursor: pointer;
+    padding: 0 4px;
+    margin: 0;
+    color: var(--text-color-light);
+    border-radius: 6px;
+    transition: color 0.2s, transform 0.2s ease-out;
+}
+
+.icon-btn:hover {
+    color: var(--text-color);
+    transform: scale(1.2) rotate(20deg); 
+}
+
+/* --- 5. Settings Grid --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- 6. Tooltip (?) --- */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color-light);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 16px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: help;
+    margin-left: 4px;
+}
+
+/* *** CORRECTED RULE HERE *** */
+/* .tooltip:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%; 
+    left: -200;           /* Start from the left edge of the parent tooltip icon */
+    right: 800;          /* Extend to the right edge of the parent tooltip icon */
+    margin: 0 auto;    /* Center the block within its available space */
+    transform: none;   /* Remove the previous transform that was causing issues */
+
+    background-color: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    
+    white-space: normal;  /* Allow text to wrap */
+    max-width: 2050px;     /* Set a max width for the box */
+    text-align: left;     /* Align text to the left */
+    
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+} 
+*/
+/* *** END CORRECTED RULE *** */
+
+
+/* --- 7. CFG Slider --- */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+#cfg_scale_value {
+    font-weight: 600;
+    min-width: 30px;
+    text-align: right;
+    color: var(--text-color-light);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    width: 100%;
+    height: 8px;
+    background: var(--slider-bg);
+    border-radius: 5px;
+    outline: none;
+    padding: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--slider-thumb);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--card-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--slider-thumb);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--card-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+
+/* --- 8. Button --- */
+button[type="submit"] {
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--primary-color-hover);
+    transform: scale(1.01);
+}
+
+button[type="submit"]:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- 9. Results --- */
+#results-container {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+#image-wrapper img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+#result-seed {
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+    margin-top: 12px;
+}
+
+#loading-text {
+    color: var(--text-color-light);
+}
+
+/* --- 10. Theme Toggle Switch --- */
+.theme-switch-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+}
+.theme-label {
+    font-size: 0.9rem;
+    color: var(--text-color-light);
+    font-weight: 500;
+}
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 28px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+input:checked + .slider:before {
+    transform: translateX(22px);
+}

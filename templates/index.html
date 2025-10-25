@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD3.5 Flash WebUI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="slider round"></span>
+        </label>
+        <span class="theme-label">Dark Mode</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Stable Diffusion - Text to Image</h1>
+            <p>A web interface using Stability AI SD3.5-Flash model.</p>
+        </header>
+
+        <main>
+            <form id="generation-form">
+                
+                <div class="label-wrapper">
+                    <label for="prompt">Prompt 🗒</label>
+                    <button type="button" id="random-prompt-btn" class="icon-btn" title="Generate random prompt">🎲</button>
+                </div>
+                <textarea id="prompt" rows="4" placeholder="A high-resolution photo of a cat wearing a tiny wizard hat"></textarea>
+                
+                <label for="negative_prompt">Negative Prompt 🚫<span class="tooltip" title="What to avoid in the image. e.g., 'blurry, ugly, text, watermark'">?</span></label>
+                <textarea id="negative_prompt" rows="2" placeholder="e.g., blurry, bad quality, low resolution"></textarea>
+
+                <div class="grid-container">
+                    
+                    <div>
+                        <label for="style_preset">Style Preset 🎨<span class="tooltip" title="A specific artistic style to apply to the image.">?</span></label>
+                        <select id="style_preset">
+                            <option value="none">(None)</option>
+                            <option value="3d-model">3D Model</option>
+                            <option value="analog-film">Analog Film</option>
+                            <option value="anime">Anime</option>
+                            <option value="cinematic">Cinematic</option>
+                            <option value="comic-book">Comic Book</option>
+                            <option value="digital-art">Digital Art</option>
+                            <option value="enhance">Enhance</option>
+                            <option value="fantasy-art" selected>Fantasy Art</option>
+                            <option value="isometric">Isometric</option>
+                            <option value="line-art">Line Art</option>
+                            <option value="low-poly">Low Poly</option>
+                            <option value="modeling-compound">Modeling Compound</option>
+                            <option value="neon-punk">Neon Punk</option>
+                            <option value="origami">Origami</option>
+                            <option value="photographic">Photographic</option>
+                            <option value="pixel-art">Pixel Art</option>
+                            <option value="tile-texture">Tile Texture</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="aspect_ratio">Aspect Ratio <span class="tooltip" title="The width-to-height ratio of the generated image.">?</span></label>
+                        <select id="aspect_ratio">
+                            <option value="1:1" selected>1:1 (Square)</option>
+                            <option value="16:9">16:9 (Widescreen)</option>
+                            <option value="21:9">21:9 (Cinematic)</option>
+                            <option value="2:3">2:3 (Portrait)</option>
+                            <option value="3:2">3:2 (Landscape)</option>
+                            <option value="4:5">4:5 (Portrait)</option>
+                            <option value="5:4">5:4 (Landscape)</option>
+                            <option value="9:16">9:16 (Tall)</option>
+                            <option value="9:21">9:21 (Extra Tall)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="cfg_scale">CFG Scale <span class="tooltip" title="How strongly the image should follow your prompt. Lower is more creative, higher is more strict. (Default: 4.0)">?</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="cfg_scale" min="1.0" max="10.0" step="0.1" value="4.0">
+                            <span id="cfg_scale_value">4.0</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="seed">Seed <span class="tooltip" title="A number to control randomness. The same seed and prompt will produce the same image. 0 means random.">?</span></label>
+                        <input type="number" id="seed" value="0" min="0">
+                    </div>
+
+                    <div>
+                        <label for="output_format">Output Format</label>
+                        <select id="output_format">
+                            <option value="jpeg" selected>JPEG (Faster, Small File)</option>
+                            <option value="png">PNG (Higher Quality)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="generate-btn">✨ Generate</button>
+            </form>
+
+            <div id="results-container">
+                <p id="loading-text" style="display: none;">Generating, please wait... this can take a moment.</p>
+                <div id="image-wrapper"></div>
+                <p id="result-seed"></p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const themeLabel = document.querySelector('.theme-label');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggle.checked = true;
+                themeLabel.textContent = 'Dark Mode';
+            } else {
+                body.classList.remove('dark-theme');
+                themeToggle.checked = false;
+                themeLabel.textContent = 'Light Mode';
+            }
+        }
+        const savedTheme = localStorage.getItem('theme');
+        applyTheme(savedTheme);
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                localStorage.setItem('theme', 'dark');
+                applyTheme('dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+                applyTheme('light');
+            }
+        });
+
+        
+        // --- *** NEW: Random Prompt Logic *** ---
+        const predefinedPrompts = [
+            "A photorealistic portrait of an astronaut from the 1960s, vintage film grain.",
+            "A minimalist logo for a coffee shop named 'The Daily Grind', black and white.",
+            "A beautiful mountain landscape at sunset, painted in the style of Bob Ross.",
+            "A 3D model of a futuristic neon-lit cyberpunk city alley.",
+            "An anime-style character, a magical girl with star-themed powers, full body.",
+            "A synthwave-inspired image of a DeLorean driving into a retro sunset.",
+            "A fantasy-art illustration of a glowing mushroom forest with fairies.",
+            "A comic-book style explosion with 'KABOOM!' written in the center.",
+            "An isometric 3D render of a tiny, cozy bedroom.",
+            "A pixel art sprite sheet for a video game hero character."
+        ];
+        
+        const randomPromptBtn = document.getElementById('random-prompt-btn');
+        const promptInput = document.getElementById('prompt'); // This element already exists
+
+        randomPromptBtn.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * predefinedPrompts.length);
+            promptInput.value = predefinedPrompts[randomIndex];
+            // Optional: Animate the prompt text area
+            promptInput.style.transition = 'background-color 0.3s';
+            promptInput.style.backgroundColor = 'var(--primary-color-faded, #e0eaff)';
+            setTimeout(() => {
+                promptInput.style.backgroundColor = 'var(--input-bg-color)';
+            }, 300);
+        });
+        // --- *** END NEW SCRIPT *** ---
+
+
+        // --- Form Logic (No changes here) ---
+        const cfgSlider = document.getElementById('cfg_scale');
+        const cfgValueText = document.getElementById('cfg_scale_value');
+        cfgSlider.addEventListener('input', () => {
+            cfgValueText.textContent = cfgSlider.value;
+        });
+
+        const form = document.getElementById('generation-form');
+        const generateBtn = document.getElementById('generate-btn');
+        const loadingText = document.getElementById('loading-text');
+        const imageWrapper = document.getElementById('image-wrapper');
+        const resultSeed = document.getElementById('result-seed');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            loadingText.style.display = 'block';
+            imageWrapper.innerHTML = '';
+            resultSeed.textContent = '';
+
+            const payload = {
+                prompt: document.getElementById('prompt').value,
+                negative_prompt: document.getElementById('negative_prompt').value,
+                style_preset: document.getElementById('style_preset').value,
+                aspect_ratio: document.getElementById('aspect_ratio').value,
+                cfg_scale: document.getElementById('cfg_scale').value,
+                seed: document.getElementById('seed').value,
+                output_format: document.getElementById('output_format').value,
+            };
+
+            try {
+                const response = await fetch('/generate-art', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok) { throw new Error(data.error || 'An unknown error occurred.'); }
+
+                const newImg = document.createElement('img');
+newImg.src = data.image_url;
+newImg.alt = payload.prompt;
+imageWrapper.appendChild(newImg);
+                resultSeed.textContent = `Generated with Seed: ${data.seed}`;
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                console.error(error);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate';
+                loadingText.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
